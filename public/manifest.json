@@ -1,0 +1,22 @@
+{
+  "short_name": "ZeroLag",
+  "name": "ZeroLag Games Store",
+  "description": "ZeroLag Games Store is your premium destination for high-speed delivery of digital accounts, last-slot games, instant logins, and secure gaming services.",
+  "icons": [
+    {
+      "src": "/assets/zerolag-logo.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/assets/zerolag-logo.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0B0B0F",
+  "theme_color": "#00F0FF",
+  "display": "standalone",
+  "orientation": "portrait"
+}

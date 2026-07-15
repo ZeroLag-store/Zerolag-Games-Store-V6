@@ -1,0 +1,33 @@
+{
+  "nav": {
+    "home": "Home",
+    "shop": "Shop",
+    "about": "About",
+    "contact": "Contact",
+    "admin": "Admin",
+    "login": "Login",
+    "profile": "Profile",
+    "track": "Track Accounts",
+    "hardware": "Hardware",
+    "top_up": "Top Up",
+    "track_orders": "Track Orders",
+    "support": "Support"
+  },
+  "hero": {
+    "title": "ELITE GAMING",
+    "subtitle": "GEAR & ACCOUNTS",
+    "description": "ZeroLag is your premier destination for high-speed digital keys and verified premium accounts.",
+    "cta": "Enter Mainframe"
+  },
+  "flash": {
+    "title": "Neural Flash Drop",
+    "description": "Limited inventory remaining in the vault. Sync now before the neural link expires.",
+    "cta": "Secure Drop"
+  },
+  "common": {
+    "search": "Translate Search...",
+    "cart": "Cart",
+    "loading": "Loading...",
+    "error": "Error detected"
+  }
+}

@@ -1,0 +1,345 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Default-deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.token.email == "zerolag0000@gmail.com" ||
+        request.auth.token.email == "osamashsgshfff@gmail.com" ||
+        request.auth.uid == "gnT4haA1tdVYDpzpDzR1TUBA37c2" ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'OWNER', 'MANAGER', 'EMPLOYEE']))
+      );
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Products
+    match /products/{productId} {
+      allow get, list: if true;
+      allow create: if isAdmin() && isValidProduct(incoming());
+      allow update: if isAdmin() && isValidProduct(incoming());
+      allow delete: if isAdmin();
+      
+      function isValidProduct(data) {
+        return (resource != null || data.keys().hasAll(['name', 'category', 'platform', 'imageUrl', 'stockStatus'])) &&
+               (!('name' in data) || (data.name is string && data.name.size() <= 200)) &&
+               (!('price' in data) || (data.price is number)) &&
+               (!('category' in data) || (data.category is string && data.category.size() <= 100)) &&
+               (!('platform' in data) || (data.platform is string && data.platform.size() <= 100)) &&
+               (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() <= 2000)) &&
+               (!('stockStatus' in data) || (data.stockStatus is string && data.stockStatus.size() <= 100)) &&
+               (!('discount' in data) || (data.discount is number)) &&
+               (!('description' in data) || (data.description is string)) &&
+               (!('pricePS4Primary' in data) || (data.pricePS4Primary is number)) &&
+               (!('pricePS5Primary' in data) || (data.pricePS5Primary is number)) &&
+               (!('priceSecondary' in data) || (data.priceSecondary is number)) &&
+               (!('slotsAvailable' in data) || (data.slotsAvailable is number)) &&
+               (!('shortDescription' in data) || (data.shortDescription is string)) &&
+               (!('costPrice' in data) || (data.costPrice is number)) &&
+               (!('salePrice' in data) || (data.salePrice is number)) &&
+               (!('profitMargin' in data) || (data.profitMargin is number)) &&
+               (!('genre' in data) || (data.genre is string)) &&
+               (!('tags' in data) || (data.tags is list)) &&
+               (!('galleryImages' in data) || (data.galleryImages is list)) &&
+               (!('featured' in data) || (data.featured is bool)) &&
+               (!('trending' in data) || (data.trending is bool)) &&
+               (!('recommended' in data) || (data.recommended is bool)) &&
+               (!('isDeleted' in data) || (data.isDeleted is bool)) &&
+               (!('createdAt' in data) || (data.createdAt is string));
+      }
+    }
+
+    // Reviews
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isValidReview(incoming());
+      allow update: if isAdmin() && isValidReview(incoming());
+      allow delete: if isAdmin();
+
+      function isValidReview(data) {
+        return (resource != null || data.keys().hasAll(['productId', 'userId', 'userName', 'rating', 'comment'])) &&
+               (!('productId' in data) || data.productId is string) &&
+               (!('userId' in data) || data.userId is string) &&
+               (!('userName' in data) || data.userName is string) &&
+               (!('rating' in data) || (data.rating is number && data.rating >= 1 && data.rating <= 5)) &&
+               (!('comment' in data) || (data.comment is string && data.comment.size() <= 1000)) &&
+               (!('isVerified' in data) || (data.isVerified is bool));
+      }
+    }
+
+    // Orders
+    match /orders/{orderId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidOrder(incoming());
+      allow update: if isAdmin() && isValidOrder(incoming());
+      allow delete: if isAdmin();
+
+      function isValidOrder(data) {
+        return (resource != null || (data.keys().hasAll(['status']) || data.keys().hasAll(['orderId', 'finalPrice', 'status']))) &&
+               (!('userId' in data) || data.userId is string) &&
+               (!('userEmail' in data) || data.userEmail is string) &&
+               (!('total' in data) || data.total is number) &&
+               (!('status' in data) || data.status is string) &&
+               (!('orderNumber' in data) || data.orderNumber is string) &&
+               (!('customerId' in data) || data.customerId is string) &&
+               (!('customerName' in data) || data.customerName is string) &&
+               (!('customerPhone' in data) || data.customerPhone is string) &&
+               (!('accountId' in data) || data.accountId is string) &&
+               (!('accountEmail' in data) || data.accountEmail is string) &&
+               (!('slotId' in data) || data.slotId is string) &&
+               (!('slotType' in data) || data.slotType is string) &&
+               (!('price' in data) || data.price is number) &&
+               (!('profit' in data) || data.profit is number) &&
+               (!('paymentMethod' in data) || data.paymentMethod is string) &&
+               (!('warrantyId' in data) || data.warrantyId is string) &&
+               (!('orderId' in data) || data.orderId is string) &&
+               (!('customerEmail' in data) || data.customerEmail is string) &&
+               (!('productId' in data) || data.productId is string) &&
+               (!('productName' in data) || data.productName is string) &&
+               (!('selectedVersion' in data) || data.selectedVersion is string) &&
+               (!('quantity' in data) || data.quantity is number) &&
+               (!('unitPrice' in data) || data.unitPrice is number) &&
+               (!('discount' in data) || data.discount is number) &&
+               (!('finalPrice' in data) || data.finalPrice is number) &&
+               (!('paymentProofUrl' in data) || data.paymentProofUrl is string) &&
+               (!('createdAt' in data) || data.createdAt is string || data.createdAt is timestamp);
+      }
+    }
+
+    // Users
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create, update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Config
+    match /config/global {
+      allow get: if true;
+      allow list, write: if isAdmin();
+    }
+
+    // Flash Deals
+    match /flash_deals/{dealId} {
+      allow read: if true;
+      allow create, update: if isAdmin() && isValidFlashDeal(incoming());
+      allow delete: if isAdmin();
+
+      function isValidFlashDeal(data) {
+        return (resource != null || data.keys().hasAll(['productId', 'name', 'price', 'discount', 'imageUrl', 'startTime', 'endTime'])) &&
+               (!('productId' in data) || data.productId is string) &&
+               (!('name' in data) || data.name is string) &&
+               (!('price' in data) || data.price is number) &&
+               (!('discount' in data) || data.discount is number) &&
+               (!('imageUrl' in data) || data.imageUrl is string) &&
+               (!('startTime' in data) || data.startTime is string) &&
+               (!('endTime' in data) || data.endTime is string);
+      }
+    }
+
+    // Accounts
+    match /accounts/{accountId} {
+      allow read: if isSignedIn();
+      allow create, update: if isAdmin() && isValidAccount(incoming());
+      allow delete: if isAdmin();
+
+      function isValidAccount(data) {
+        return (resource != null || data.keys().hasAll(['email', 'productId', 'productName', 'region'])) &&
+               (!('email' in data) || data.email is string) &&
+               (!('password' in data) || data.password is string) &&
+               (!('recoveryEmail' in data) || data.recoveryEmail is string) &&
+               (!('recoveryPhone' in data) || data.recoveryPhone is string) &&
+               (!('productId' in data) || data.productId is string) &&
+               (!('productName' in data) || data.productName is string) &&
+               (!('region' in data) || data.region is string) &&
+               (!('notes' in data) || data.notes is string) &&
+               (!('slots' in data) || data.slots is list) &&
+               (!('createdAt' in data) || data.createdAt is string) &&
+               (!('updatedAt' in data) || data.updatedAt is string);
+      }
+    }
+
+    // Customers
+    match /customers/{customerId} {
+      allow read: if isSignedIn();
+      allow create, update: if isAdmin() && isValidCustomer(incoming());
+      allow delete: if isAdmin();
+
+      function isValidCustomer(data) {
+        return (resource != null || data.keys().hasAll(['phoneNumber'])) &&
+               (!('fullName' in data) || data.fullName is string) &&
+               (!('phoneNumber' in data) || data.phoneNumber is string) &&
+               (!('whatsApp' in data) || data.whatsApp is string) &&
+               (!('facebookProfile' in data) || data.facebookProfile is string) &&
+               (!('notes' in data) || data.notes is string) &&
+               (!('totalSpending' in data) || data.totalSpending is number) &&
+               (!('orderCount' in data) || data.orderCount is number);
+      }
+    }
+
+    // Activity Logs
+    match /activity_logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() && isValidLog(incoming());
+      allow update, delete: if false; // Logs are immutable
+
+      function isValidLog(data) {
+        return (resource != null || data.keys().hasAll(['user', 'action', 'entity', 'details', 'date'])) &&
+               (!('user' in data) || data.user is string) &&
+               (!('action' in data) || data.action is string) &&
+               (!('entity' in data) || data.entity is string) &&
+               (!('details' in data) || data.details is string);
+      }
+    }
+
+    // Receipts
+    match /receipts/{receiptId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() && isValidReceipt(incoming());
+      allow update, delete: if false; // Financial receipts are immutable
+
+      function isValidReceipt(data) {
+        return (resource != null || data.keys().hasAll(['receiptCode', 'orderId', 'customerId', 'price', 'date'])) &&
+               (!('receiptCode' in data) || data.receiptCode is string) &&
+               (!('orderId' in data) || data.orderId is string) &&
+               (!('customerId' in data) || data.customerId is string) &&
+               (!('customerName' in data) || data.customerName is string) &&
+               (!('productName' in data) || data.productName is string) &&
+               (!('slotType' in data) || data.slotType is string) &&
+               (!('price' in data) || data.price is number) &&
+               (!('warrantyDuration' in data) || data.warrantyDuration is string);
+      }
+    }
+
+    // Warranties
+    match /warranties/{warrantyId} {
+      allow read: if isSignedIn();
+      allow create, update: if isAdmin() && isValidWarranty(incoming());
+      allow delete: if isAdmin();
+
+      function isValidWarranty(data) {
+        return (resource != null || data.keys().hasAll(['orderId', 'customerId', 'startDate', 'endDate', 'status'])) &&
+               (!('orderId' in data) || data.orderId is string) &&
+               (!('customerId' in data) || data.customerId is string) &&
+               (!('customerName' in data) || data.customerName is string) &&
+               (!('productName' in data) || data.productName is string) &&
+               (!('slotType' in data) || data.slotType is string) &&
+               (!('startDate' in data) || data.startDate is string) &&
+               (!('endDate' in data) || data.endDate is string) &&
+               (!('status' in data) || data.status is string);
+      }
+    }
+
+    // Reservations
+    match /reservations/{reservationId} {
+      allow read: if isSignedIn();
+      allow create, update: if isAdmin() && isValidReservation(incoming());
+      allow delete: if isAdmin();
+
+      function isValidReservation(data) {
+        return (resource != null || data.keys().hasAll(['customerId', 'digitalAccountId', 'slotId', 'reservedUntil', 'status'])) &&
+               (!('customerId' in data) || data.customerId is string) &&
+               (!('customerName' in data) || data.customerName is string) &&
+               (!('digitalAccountId' in data) || data.digitalAccountId is string) &&
+               (!('slotId' in data) || data.slotId is string) &&
+               (!('productName' in data) || data.productName is string) &&
+               (!('slotType' in data) || data.slotType is string) &&
+               (!('reservedUntil' in data) || data.reservedUntil is string) &&
+               (!('status' in data) || data.status is string) &&
+               (!('notes' in data) || data.notes is string);
+      }
+    }
+
+    // Settings (Global and Store levels)
+    match /settings/{settingId} {
+      allow read, get, list: if true;
+      allow write, create, update, delete: if isAdmin();
+    }
+
+    // Media Library (Image repository)
+    match /media_library/{mediaId} {
+      allow read, get, list: if true;
+      allow create: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Admins (Collection to handle multiple admins and roles)
+    match /admins/{userId} {
+      allow get: if isSignedIn();
+      allow list: if isAdmin();
+      allow create, update: if isAdmin() && incoming().role in ['super_admin', 'admin'];
+      allow delete: if isAdmin() && request.auth.uid != userId; // Prevent self-deletion
+    }
+
+    // Featured Banners
+    match /featured_banners/{bannerId} {
+      allow read, get, list: if true;
+      allow create: if isAdmin() && isValidFeaturedBanner(incoming());
+      allow update: if isAdmin() && isValidFeaturedBanner(incoming());
+      allow delete: if isAdmin();
+
+      function isValidFeaturedBanner(data) {
+        return (resource != null || data.keys().hasAll(['title', 'imageUrl', 'priority', 'displayOrder', 'isActive'])) &&
+               (!('title' in data) || (data.title is string && data.title.size() <= 200)) &&
+               (!('subtitle' in data) || (data.subtitle is string && data.subtitle.size() <= 200)) &&
+               (!('description' in data) || (data.description is string)) &&
+               (!('buttonText' in data) || (data.buttonText is string && data.buttonText.size() <= 100)) &&
+               (!('buttonUrl' in data) || (data.buttonUrl is string && data.buttonUrl.size() <= 2000)) &&
+               (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() <= 2000)) &&
+               (!('mobileImageUrl' in data) || (data.mobileImageUrl is string && data.mobileImageUrl.size() <= 2000)) &&
+               (!('bgColor' in data) || (data.bgColor is string && data.bgColor.size() <= 100)) &&
+               (!('textColor' in data) || (data.textColor is string && data.textColor.size() <= 100)) &&
+               (!('priority' in data) || (data.priority in ['low', 'medium', 'high'])) &&
+               (!('displayOrder' in data) || (data.displayOrder is number)) &&
+               (!('isActive' in data) || (data.isActive is bool)) &&
+               (!('isArchived' in data) || (data.isArchived is bool)) &&
+               (!('startDate' in data) || (data.startDate is string)) &&
+               (!('endDate' in data) || (data.endDate is string)) &&
+               (!('createdAt' in data) || (data.createdAt is string)) &&
+               (!('updatedAt' in data) || (data.updatedAt is string));
+      }
+    }
+
+    // Payment Methods
+    match /payment_methods/{methodId} {
+      allow read, get, list: if true;
+      allow write, create, update, delete: if isAdmin();
+    }
+
+    // Homepage Sections
+    match /homepage_sections/{sectionId} {
+      allow read, get, list: if true;
+      allow write, create, update, delete: if isAdmin();
+    }
+  }
+}

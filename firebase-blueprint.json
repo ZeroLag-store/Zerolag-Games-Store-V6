@@ -1,0 +1,329 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "A gaming product or subscription available for purchase.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "The name of the product." },
+        "price": { "type": "number", "description": "The base price of the product." },
+        "discount": { "type": "number", "description": "The discount percentage (0-100)." },
+        "description": { "type": "string", "description": "Detailed product description." },
+        "category": { "type": "string", "enum": ["Games", "Subscriptions", "Services"], "description": "Product category." },
+        "platform": { "type": "string", "enum": ["PC", "PS", "Xbox", "All"], "description": "Target platform." },
+        "imageUrl": { "type": "string", "description": "URL of the product image." },
+        "stockStatus": { "type": "string", "enum": ["In Stock", "Out of Stock"], "description": "Current availability." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the product was added." }
+      },
+      "required": ["name", "price", "category", "platform", "imageUrl", "stockStatus"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "A customer order.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "The ID of the user who placed the order." },
+        "customerEmail": { "type": "string", "description": "Email for contact." },
+        "customerPhone": { "type": "string", "description": "Phone number for contact." },
+        "products": { "type": "array", "description": "List of product IDs or objects." },
+        "totalAmount": { "type": "number", "description": "Final price after discounts." },
+        "status": { "type": "string", "enum": ["Pending", "Completed", "Cancelled"], "description": "Order status." },
+        "paymentMethod": { "type": "string", "enum": ["Vodafone Cash", "InstaPay", "Cash"], "description": "Payment method used." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the order was placed." }
+      },
+      "required": ["userId", "products", "totalAmount", "status", "paymentMethod"]
+    },
+    "User": {
+      "title": "User",
+      "description": "User profile information.",
+      "type": "object",
+      "properties": {
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "user"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "role"]
+    },
+    "AppConfig": {
+      "title": "AppConfig",
+      "description": "Global application configuration.",
+      "type": "object",
+      "properties": {
+        "logoUrl": { "type": "string", "description": "URL of the company logo." },
+        "heroBanner": { "type": "string" },
+        "contactPhone": { "type": "string" },
+        "offers": { "type": "array" }
+      }
+    },
+    "Review": {
+      "title": "Review",
+      "description": "A user review for a product.",
+      "type": "object",
+      "properties": {
+        "productId": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "rating": { "type": "number" },
+        "comment": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["productId", "userId", "userName", "rating", "comment"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Admin user with specific permissions.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["super_admin", "admin"] },
+        "permissions": { 
+          "type": "object",
+          "properties": {
+            "canManageProducts": { "type": "boolean" },
+            "canManageOrders": { "type": "boolean" },
+            "canManageAccounts": { "type": "boolean" },
+            "canManageFlashDeals": { "type": "boolean" },
+            "canManageAdmins": { "type": "boolean" }
+          }
+        },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "role"]
+    },
+    "FlashDeal": {
+      "title": "FlashDeal",
+      "description": "A dynamic flash sale offer.",
+      "type": "object",
+      "properties": {
+        "productId": { "type": "string" },
+        "name": { "type": "string" },
+        "price": { "type": "number" },
+        "discount": { "type": "number" },
+        "imageUrl": { "type": "string" },
+        "startTime": { "type": "string", "format": "date-time" },
+        "endTime": { "type": "string", "format": "date-time" },
+        "isActive": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["productId", "name", "price", "discount", "imageUrl", "startTime", "endTime"]
+    },
+    "Account": {
+      "title": "Account",
+      "description": "Game or subscription account details.",
+      "type": "object",
+      "properties": {
+        "accountCode": { "type": "string", "description": "Readable unique ID" },
+        "type": { "type": "string", "enum": ["Primary 4", "Primary 5", "Secondary"] },
+        "category": { "type": "string", "enum": ["Game", "PS Plus", "Other"] },
+        "productName": { "type": "string" },
+        "status": { "type": "string", "enum": ["Available", "Reserved", "Assigned", "Expired"] },
+        "customerPhone": { "type": "string" },
+        "customerId": { "type": "string", "description": "Link to customer document" },
+        "notes": { "type": "string" },
+        "credentials": { "type": "string", "description": "Email/Password for the account." },
+        "startDate": { "type": "string", "format": "date-time" },
+        "expiryDate": { "type": "string", "format": "date-time" },
+        "assignedAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["type", "category", "productName", "status"]
+    },
+    "Customer": {
+      "title": "Customer",
+      "description": "Customer contact and history.",
+      "type": "object",
+      "properties": {
+        "phoneNumber": { "type": "string" },
+        "name": { "type": "string" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["phoneNumber"]
+    },
+    "ActivityLog": {
+      "title": "ActivityLog",
+      "description": "Audit trail for system actions.",
+      "type": "object",
+      "properties": {
+        "actionType": { "type": "string", "enum": ["create", "assign", "edit", "delete", "renew", "status_change"] },
+        "accountId": { "type": "string" },
+        "accountCode": { "type": "string" },
+        "adminId": { "type": "string" },
+        "description": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["actionType", "adminId", "description", "timestamp"]
+    },
+    "Receipt": {
+      "title": "Receipt",
+      "description": "Customer financial billing receipt.",
+      "type": "object",
+      "properties": {
+        "receiptCode": { "type": "string" },
+        "orderId": { "type": "string" },
+        "customerId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "productName": { "type": "string" },
+        "price": { "type": "number" },
+        "date": { "type": "string", "format": "date-time" }
+      },
+      "required": ["receiptCode", "orderId", "customerId", "price", "date"]
+    },
+    "Warranty": {
+      "title": "Warranty",
+      "description": "Extended digital service contract.",
+      "type": "object",
+      "properties": {
+        "orderId": { "type": "string" },
+        "customerId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "productName": { "type": "string" },
+        "startDate": { "type": "string", "format": "date-time" },
+        "endDate": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["ACTIVE", "EXPIRED", "VOID"] }
+      },
+      "required": ["orderId", "customerId", "startDate", "endDate", "status"]
+    },
+    "Reservation": {
+      "title": "Reservation",
+      "description": "Temporary stock hold for a customer.",
+      "type": "object",
+      "properties": {
+        "customerId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "digitalAccountId": { "type": "string" },
+        "slotId": { "type": "string" },
+        "productName": { "type": "string" },
+        "reservedUntil": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["ACTIVE", "EXPIRED", "COMPLETED", "CANCELLED"] }
+      },
+      "required": ["customerId", "digitalAccountId", "slotId", "reservedUntil", "status"]
+    },
+    "StoreSettings": {
+      "title": "StoreSettings",
+      "description": "Store branding and profile management.",
+      "type": "object",
+      "properties": {
+        "storeName": { "type": "string" },
+        "storeDescription": { "type": "string" },
+        "logoUrl": { "type": "string" },
+        "faviconUrl": { "type": "string" },
+        "heroBannerUrl": { "type": "string" },
+        "primaryColor": { "type": "string" },
+        "secondaryColor": { "type": "string" },
+        "phone": { "type": "string" },
+        "whatsapp": { "type": "string" },
+        "facebook": { "type": "string" },
+        "instagram": { "type": "string" },
+        "tiktok": { "type": "string" },
+        "youtube": { "type": "string" },
+        "discord": { "type": "string" },
+        "address": { "type": "string" },
+        "workingHours": { "type": "string" }
+      }
+    },
+    "MediaItem": {
+      "title": "MediaItem",
+      "description": "Dedicated Media Library item.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "url": { "type": "string" },
+        "size": { "type": "number" },
+        "uploadedAt": { "type": "string" }
+      }
+    },
+    "FeaturedBanner": {
+      "title": "FeaturedBanner",
+      "description": "Feature display banners for site home carousel.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "subtitle": { "type": "string" },
+        "description": { "type": "string" },
+        "buttonText": { "type": "string" },
+        "buttonUrl": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "mobileImageUrl": { "type": "string" },
+        "bgColor": { "type": "string" },
+        "textColor": { "type": "string" },
+        "priority": { "type": "string", "enum": ["low", "medium", "high"] },
+        "displayOrder": { "type": "number" },
+        "isActive": { "type": "boolean" },
+        "isArchived": { "type": "boolean" },
+        "startDate": { "type": "string" },
+        "endDate": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["title", "imageUrl", "priority", "displayOrder", "isActive"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Collection of all available products."
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Collection of customer orders."
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile data."
+    },
+    "/admins/{adminId}": {
+      "schema": "Admin",
+      "description": "Platform administrators and permissions."
+    },
+    "/flash_deals/{dealId}": {
+      "schema": "FlashDeal",
+      "description": "Active and scheduled flash sales."
+    },
+    "/accounts/{accountId}": {
+      "schema": "Account",
+      "description": "Game accounts inventory."
+    },
+    "/customers/{customerId}": {
+      "schema": "Customer",
+      "description": "Customer CRM data."
+    },
+    "/activity_logs/{logId}": {
+      "schema": "ActivityLog",
+      "description": "System audit logs."
+    },
+    "/config/global": {
+      "schema": "AppConfig",
+      "description": "Global settings for the app."
+    },
+    "/reviews/{reviewId}": {
+      "schema": "Review",
+      "description": "Product reviews."
+    },
+    "/receipts/{receiptId}": {
+      "schema": "Receipt",
+      "description": "Financial billing receipts."
+    },
+    "/warranties/{warrantyId}": {
+      "schema": "Warranty",
+      "description": "Product active extended warranties."
+    },
+    "/reservations/{reservationId}": {
+      "schema": "Reservation",
+      "description": "Temporary account reservations."
+    },
+    "/settings/{settingId}": {
+      "schema": "StoreSettings",
+      "description": "Store branding settings."
+    },
+    "/media_library/{mediaId}": {
+      "schema": "MediaItem",
+      "description": "Media library assets catalog."
+    },
+    "/featured_banners/{bannerId}": {
+      "schema": "FeaturedBanner",
+      "description": "Promotional sliding banners on storefront."
+    }
+  }
+}

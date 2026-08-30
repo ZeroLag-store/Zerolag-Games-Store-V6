@@ -1,0 +1,6 @@
+{
+  "name": "Zerolag Games Store",
+  "description": "Enterprise-grade Zerolag Control Center internal ERP and CRM console tracking digital accounts, reservations, warranties, and sales statistics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
